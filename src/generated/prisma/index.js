@@ -181,17 +181,16 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
-  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
         "fromEnvVar": "DATABASE_URL",
-        "value": null
+        "value": "postgresql://postgres:AdminIndyFlow@db.xwxkzionexdvwbkyutlz.supabase.co:5432/postgres"
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nenum ContactStatus {\n  PROSPECT\n  CLIENT\n}\n\nmodel Contact {\n  id        String        @id @default(cuid())\n  name      String\n  email     String        @unique\n  phone     String?\n  company   String?\n  notes     String?\n  status    ContactStatus @default(PROSPECT)\n  createdAt DateTime      @default(now())\n\n  projects Project[]\n}\n\nenum ProjectStatus {\n  PENDING\n  IN_PROGRESS\n  COMPLETED\n  CANCELED\n}\n\nmodel Project {\n  id          String        @id @default(cuid())\n  title       String\n  description String?\n  amount      Float?\n  dueDate     DateTime?\n  status      ProjectStatus @default(PENDING)\n  createdAt   DateTime      @default(now())\n\n  contactId String\n  contact   Contact @relation(fields: [contactId], references: [id])\n}\n",
-  "inlineSchemaHash": "1fb8914d69cb72af4dbcdbaf9950431ac5543361a26fcdba32983a017e74d8ad",
+  "inlineSchema": "// ----------------------------------------------\n// 🎯 Prisma Schema - Base de données principale\n// ----------------------------------------------\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\n// -----------------------------\n// 🔁 Enum : Statut d’un contact\n// -----------------------------\nenum ContactStatus {\n  PROSPECT\n  CLIENT\n}\n\n// --------------------------------\n// 🧑‍💼 Modèle : Contact (client ou prospect)\n// --------------------------------\nmodel Contact {\n  id        String        @id @default(cuid()) // Identifiant unique\n  name      String // Nom complet\n  email     String        @unique // Email (unique)\n  phone     String? // Numéro de téléphone\n  company   String? // Entreprise\n  notes     String? // Notes internes\n  status    ContactStatus @default(PROSPECT) // Statut initial\n  createdAt DateTime      @default(now()) // Date de création\n\n  projects Project[] // Projets associés\n}\n\n// ------------------------------\n// 🔁 Enum : Statut d’un projet\n// ------------------------------\nenum ProjectStatus {\n  PENDING\n  IN_PROGRESS\n  COMPLETED\n  CANCELED\n}\n\n// ---------------------------\n// 📦 Modèle : Projet lié à un contact\n// ---------------------------\nmodel Project {\n  id          String        @id @default(cuid()) // Identifiant unique\n  title       String // Titre du projet\n  description String? // Description facultative\n  amount      Float? // Montant prévu\n  dueDate     DateTime? // Date d’échéance\n  status      ProjectStatus @default(PENDING) // Statut initial\n  createdAt   DateTime      @default(now()) // Date de création\n\n  contactId String // FK vers le contact\n  contact   Contact @relation(fields: [contactId], references: [id]) // Relation directe\n}\n",
+  "inlineSchemaHash": "b3f80aa18d45d8d9bd0c7931ab325bbab899159342e80edfac5bc8ce24043854",
   "copyEngine": true
 }
 

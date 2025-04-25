@@ -1,8 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// ----------------------------------------------
+// 🎯 Prisma Schema - Base de données principale
+// ----------------------------------------------
 
 generator client {
   provider = "prisma-client-js"
@@ -14,24 +12,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// -----------------------------
+// 🔁 Enum : Statut d’un contact
+// -----------------------------
 enum ContactStatus {
   PROSPECT
   CLIENT
 }
 
+// --------------------------------
+// 🧑‍💼 Modèle : Contact (client ou prospect)
+// --------------------------------
 model Contact {
-  id        String        @id @default(cuid())
-  name      String
-  email     String        @unique
-  phone     String?
-  company   String?
-  notes     String?
-  status    ContactStatus @default(PROSPECT)
-  createdAt DateTime      @default(now())
+  id        String        @id @default(cuid()) // Identifiant unique
+  name      String // Nom complet
+  email     String        @unique // Email (unique)
+  phone     String? // Numéro de téléphone
+  company   String? // Entreprise
+  notes     String? // Notes internes
+  status    ContactStatus @default(PROSPECT) // Statut initial
+  createdAt DateTime      @default(now()) // Date de création
 
-  projects Project[]
+  projects Project[] // Projets associés
 }
 
+// ------------------------------
+// 🔁 Enum : Statut d’un projet
+// ------------------------------
 enum ProjectStatus {
   PENDING
   IN_PROGRESS
@@ -39,15 +46,18 @@ enum ProjectStatus {
   CANCELED
 }
 
+// ---------------------------
+// 📦 Modèle : Projet lié à un contact
+// ---------------------------
 model Project {
-  id          String        @id @default(cuid())
-  title       String
-  description String?
-  amount      Float?
-  dueDate     DateTime?
-  status      ProjectStatus @default(PENDING)
-  createdAt   DateTime      @default(now())
+  id          String        @id @default(cuid()) // Identifiant unique
+  title       String // Titre du projet
+  description String? // Description facultative
+  amount      Float? // Montant prévu
+  dueDate     DateTime? // Date d’échéance
+  status      ProjectStatus @default(PENDING) // Statut initial
+  createdAt   DateTime      @default(now()) // Date de création
 
-  contactId String
-  contact   Contact @relation(fields: [contactId], references: [id])
+  contactId String // FK vers le contact
+  contact   Contact @relation(fields: [contactId], references: [id]) // Relation directe
 }
