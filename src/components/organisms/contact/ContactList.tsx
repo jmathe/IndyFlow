@@ -174,10 +174,9 @@ export function ContactList({
               </Button>
               <Button
                 size="icon"
-                variant="ghost"
+                variant="destructive"
                 onClick={() => handleDelete(contact.id)}
                 aria-label={`Delete contact ${contact.name}`}
-                className="hover:bg-destructive/20"
               >
                 <TrashIcon className="w-5 h-5" />
               </Button>
@@ -187,12 +186,14 @@ export function ContactList({
       </ul>
 
       {/* 📄 Pagination Controls */}
-      <Pagination
-        page={page}
-        totalCount={totalCount}
-        pageSize={pageSize}
-        onPageChange={onPageChange}
-      />
+      {totalPages > 1 && (
+        <Pagination
+          page={page}
+          totalCount={totalCount}
+          pageSize={pageSize}
+          onPageChange={onPageChange}
+        />
+      )}
     </div>
   );
 }

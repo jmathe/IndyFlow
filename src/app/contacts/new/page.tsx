@@ -1,8 +1,11 @@
 // src/app/contacts/new/page.tsx
 
-"use client";
-
 import { ContactFormCreateContainer } from "@/components/containers/contact/ContactFormCreateContainer";
+import { Metadata } from "next";
+export const generateMetadata = (): Metadata => ({
+  title: "Create Contact | IndyFlow",
+  description: "Create contact in IndyFlow.",
+});
 
 /**
  * Page for creating a new contact.

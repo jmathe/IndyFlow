@@ -3,10 +3,33 @@
 import {
   SelectContent,
   SelectItem,
-  SelectTrigger,
   SelectValue,
   Select as ShadSelect,
+  SelectTrigger as ShadSelectTrigger,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import { forwardRef } from "react";
+
+/**
+ * Custom SelectTrigger to correctly propagate id/name for accessibility.
+ */
+const selectTrigger = forwardRef<
+  HTMLButtonElement,
+  React.ComponentPropsWithoutRef<typeof ShadSelectTrigger> & {
+    id?: string;
+    name?: string;
+  }
+>(({ id, name, className, ...props }, ref) => {
+  return (
+    <ShadSelectTrigger
+      id={id}
+      name={name}
+      ref={ref}
+      className={cn(className)}
+      {...props}
+    />
+  );
+});
 
 /**
  * Namespace for the styled Select atom component, based on ShadCN.
@@ -32,7 +55,7 @@ import {
  */
 export const Select = {
   Root: ShadSelect,
-  Trigger: SelectTrigger,
+  Trigger: selectTrigger,
   Value: SelectValue,
   Content: SelectContent,
   Item: SelectItem,

@@ -38,9 +38,11 @@ export type ContactStatus = (typeof ContactStatus)[keyof typeof ContactStatus]
 
 export const ProjectStatus: {
   PENDING: 'PENDING',
+  QUOTE_SENT: 'QUOTE_SENT',
+  ACCEPTED: 'ACCEPTED',
   IN_PROGRESS: 'IN_PROGRESS',
   COMPLETED: 'COMPLETED',
-  CANCELED: 'CANCELED'
+  CANCELLED: 'CANCELLED'
 };
 
 export type ProjectStatus = (typeof ProjectStatus)[keyof typeof ProjectStatus]

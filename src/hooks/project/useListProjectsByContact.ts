@@ -1,10 +1,9 @@
 "use client";
 
-import { ListProjectsResult } from "@/core/domain/project/types";
+import { ListProjectsResponse } from "@/core/domain/project/types";
 import { listProjectsByContact } from "@/infrastructure/services/project.service";
-import { AppError } from "@/lib/errors/AppError";
 import logger from "@/lib/logger";
-import { notify } from "@/lib/notify";
+import { notifyMutationError } from "@/lib/notify/notifyHelpers";
 import { useQuery } from "@tanstack/react-query";
 
 /**
@@ -16,7 +15,7 @@ import { useQuery } from "@tanstack/react-query";
  *
  * @function useListProjectsByContact
  * @param {string} contactId - The contact's unique identifier
- * @returns {UseQueryResult<ListProjectsResult>} Query result containing the projects list
+ * @returns {UseQueryResult<ListProjectsResponse>} Query result containing the projects list
  */
 export function useListProjectsByContact(contactId: string) {
   const options = {
@@ -27,6 +26,8 @@ export function useListProjectsByContact(contactId: string) {
 
     /**
      * Query function to fetch projects associated with the given contact
+     *
+     * @returns {Promise<ListProjectsResponse>} The paginated projects
      */
     queryFn: () => listProjectsByContact(contactId),
 
@@ -40,7 +41,7 @@ export function useListProjectsByContact(contactId: string) {
      *
      * @param {ListProjectsResponse} data - Response data
      */
-    onSuccess: (data: ListProjectsResult) => {
+    onSuccess: (data: ListProjectsResponse) => {
       logger.info("useListProjectsByContact: Projects fetched successfully", {
         contactId,
         projectCount: data.data.length,
@@ -58,12 +59,9 @@ export function useListProjectsByContact(contactId: string) {
         error
       );
 
-      const message =
-        error instanceof AppError
-          ? error.message
-          : (error as Error).message || "An unexpected error occurred";
-
-      notify.error("Failed to load projects", message);
+      notifyMutationError("list", "Project", error, {
+        details: { contactId },
+      });
     },
   } as const;
 

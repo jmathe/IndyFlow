@@ -5,10 +5,9 @@ import {
   ListContactsResponse,
 } from "@/core/domain/contact/types";
 import { listContactsRequest } from "@/infrastructure/services/contact.service";
-import { AppError } from "@/lib/errors/AppError";
 import logger from "@/lib/logger";
-import { notify } from "@/lib/notify";
-import { useQuery } from "@tanstack/react-query";
+import { notifyMutationError } from "@/lib/notify/notifyHelpers";
+import { useQuery, UseQueryResult } from "@tanstack/react-query";
 
 /**
  * Custom React Query hook to fetch a paginated list of contacts.
@@ -21,7 +20,10 @@ import { useQuery } from "@tanstack/react-query";
  * @param {ListContactsParams} params - The pagination parameters
  * @returns {UseQueryResult<ListContactsResponse>} Query result object
  */
-export function useListContacts({ page, limit }: ListContactsParams) {
+export function useListContacts({
+  page,
+  limit,
+}: ListContactsParams): UseQueryResult<ListContactsResponse> {
   // Define options as a constant object to preserve type inference
   const options = {
     /**
@@ -31,6 +33,9 @@ export function useListContacts({ page, limit }: ListContactsParams) {
 
     /**
      * Function calling the service to fetch paginated contacts
+     *
+     * @param {ListContactsParams} params - Pagination parameters
+     * @returns {Promise<ListContactsResponse>} The paginated contacts
      */
     queryFn: () => listContactsRequest({ page, limit }),
 
@@ -60,12 +65,7 @@ export function useListContacts({ page, limit }: ListContactsParams) {
     onError: (error: unknown) => {
       logger.error("useListContacts: Failed to fetch contacts", error);
 
-      const message =
-        error instanceof AppError
-          ? error.message
-          : (error as Error).message || "An unexpected error occurred";
-
-      notify.error("Failed to load contacts", message);
+      notifyMutationError("list", "Contact", error);
     },
   } as const;
 

@@ -1,10 +1,8 @@
-// src/components/organisms/ContactProfile.tsx
+"use client";
 
-("use client");
-
-import { ContactDTO } from "@/core/domain/contact/types";
 import { Badge } from "@/components/atoms/Badge";
 import { Button } from "@/components/atoms/Button";
+import { ContactDTO } from "@/core/domain/contact/types";
 import logger from "@/lib/logger";
 import { useRouter } from "next/navigation";
 
@@ -58,17 +56,25 @@ export function ContactProfile({ contact, onDelete }: ContactProfileProps) {
 
       <div className="space-y-1 text-sm">
         <p>Email: {contact.email}</p>
-        {contact.phone && <p>Téléphone: {contact.phone}</p>}
-        {contact.company && <p>Entreprise: {contact.company}</p>}
+        {contact.phone && <p>Phone: {contact.phone}</p>}
+        {contact.company && <p>Company: {contact.company}</p>}
         {contact.notes && <p>Notes: {contact.notes}</p>}
       </div>
 
       <div className="flex gap-2">
-        <Button variant="outline" onClick={handleEdit}>
-          Modifier
+        <Button
+          variant="outline"
+          onClick={handleEdit}
+          aria-label={`Edit ${contact.name}`}
+        >
+          Edit
         </Button>
-        <Button variant="destructive" onClick={handleDelete}>
-          Supprimer
+        <Button
+          variant="destructive"
+          onClick={handleDelete}
+          aria-label={`Delete ${contact.name}`}
+        >
+          Delete
         </Button>
       </div>
     </div>

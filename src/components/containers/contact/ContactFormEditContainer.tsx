@@ -38,7 +38,7 @@ export function ContactFormEditContainer() {
   const { data: contact, isLoading } = useContact(id);
 
   // Mutation hook to update contact
-  const updateContact = useUpdateContact();
+  const { mutateAsync: updateContact } = useUpdateContact();
 
   /**
    * Submit handler for contact update
@@ -55,12 +55,8 @@ export function ContactFormEditContainer() {
       status: values.status,
     };
 
-    updateContact.mutate(
-      { id, data: payload },
-      {
-        onSuccess: () => router.push("/contacts"),
-      }
-    );
+    await updateContact({ id, data: payload });
+    router.push("/contacts");
   };
 
   if (isLoading) {

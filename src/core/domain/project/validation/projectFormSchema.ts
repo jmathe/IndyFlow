@@ -4,12 +4,12 @@ import { ProjectStatus } from "@/generated/prisma";
 import { z } from "zod";
 
 /**
- * Zod schema for validating project form data.
- * Ensures user input meets defined requirements before submission.
+ * Base schema without additional cross-field validation.
+ * Used as foundation for both create and update schemas.
  *
- * @constant projectFormSchema
+ * @constant projectbaseSchema
  */
-export const projectFormSchema = z.object({
+export const projectBaseSchema = z.object({
   /**
    * The project's title. Must be at least 1 character long.
    */
@@ -18,7 +18,10 @@ export const projectFormSchema = z.object({
   /**
    * Optional description of the project.
    */
-  description: z.string().optional(),
+  description: z
+    .string()
+    .max(1000, "Description must not exceed 1000 characters.")
+    .optional(),
 
   /**
    * Optional amount planned for the project. Must be a positive number if provided.
@@ -30,13 +33,26 @@ export const projectFormSchema = z.object({
 
   /**
    * Optional due date in ISO string format. Must be a valid date if provided.
+   * If filled, must be a valid future or present date.
    */
   dueDate: z
     .string()
     .optional()
     .refine((val) => !val || !isNaN(Date.parse(val)), {
       message: "Invalid date format.",
-    }),
+    })
+    .refine(
+      (val) => {
+        if (!val) return true;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Reset time to compare only dates
+        const due = new Date(val);
+        return due >= today;
+      },
+      {
+        message: "Due date must be today or in the future.",
+      }
+    ),
 
   /**
    * The project's status.
@@ -53,9 +69,29 @@ export const projectFormSchema = z.object({
 });
 
 /**
- * Type representing the validated project form values.
- * Automatically inferred from the Zod schema.
+ * Full schema used for project creation.
+ * Applies additional global rules.
  *
- * @type ProjectFormValues
+ *  @constant projectFormSchema
+ */
+export const projectFormSchema = projectBaseSchema.refine(
+  (data) => !["COMPLETED", "CANCELLED"].includes(data.status) || !!data.dueDate,
+  {
+    message: "Due date is required when the project is completed or cancelled.",
+    path: ["dueDate"],
+  }
+);
+
+/**
+ * Schema used for project update (PATCH or PUT).
+ * Fields are optional because user might update only a part.
+ */
+export const projectUpdateSchema = projectBaseSchema.partial().extend({
+  promoteContact: z.boolean().optional(),
+});
+
+/**
+ * Types automatically inferred from schemas.
  */
 export type ProjectFormValues = z.infer<typeof projectFormSchema>;
+export type ProjectUpdateValues = z.infer<typeof projectUpdateSchema>;

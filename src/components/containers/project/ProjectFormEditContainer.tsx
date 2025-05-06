@@ -3,14 +3,12 @@
 "use client";
 
 import { ProjectForm } from "@/components/organisms/project/ProjectForm";
-import { ProjectUpdateDTO } from "@/core/domain/project/types";
-import { ProjectFormValues } from "@/core/domain/project/validation/projectFormSchema";
+import { UpdateProjectPayload } from "@/core/domain/project/types";
 import { useProject } from "@/hooks/project/useProject";
 import { useUpdateProject } from "@/hooks/project/useUpdateProject";
 import { validateId } from "@/lib/validateId";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
-
 /**
  * Container component to manage project editing.
  *
@@ -38,29 +36,26 @@ export function ProjectFormEditContainer() {
   const { data: project, isLoading } = useProject(id);
 
   // Setup mutation hook for updating the project
-  const updateProject = useUpdateProject();
+  const { mutateAsync: updateProject } = useUpdateProject();
 
   /**
    * Submit handler to update the project.
    *
-   * @param {ProjectFormValues} values - Form values to update
+   * @param {} values - Form values to update
    */
-  const handleUpdate = async (values: ProjectFormValues) => {
-    const payload: ProjectUpdateDTO = {
+  const handleUpdate = async (values: UpdateProjectPayload) => {
+    const payload: UpdateProjectPayload = {
       title: values.title,
       description: values.description,
       amount: values.amount,
       dueDate: values.dueDate ?? undefined,
       status: values.status,
       contactId: values.contactId,
+      promoteContact: values.promoteContact,
     };
 
-    updateProject.mutate(
-      { id, data: payload },
-      {
-        onSuccess: () => router.push("/projects"),
-      }
-    );
+    await updateProject({ id, data: payload });
+    router.push("/projects");
   };
 
   if (isLoading) {

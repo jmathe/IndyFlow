@@ -160,9 +160,11 @@ exports.ContactStatus = exports.$Enums.ContactStatus = {
 
 exports.ProjectStatus = exports.$Enums.ProjectStatus = {
   PENDING: 'PENDING',
+  QUOTE_SENT: 'QUOTE_SENT',
+  ACCEPTED: 'ACCEPTED',
   IN_PROGRESS: 'IN_PROGRESS',
   COMPLETED: 'COMPLETED',
-  CANCELED: 'CANCELED'
+  CANCELLED: 'CANCELLED'
 };
 
 exports.Prisma.ModelName = {

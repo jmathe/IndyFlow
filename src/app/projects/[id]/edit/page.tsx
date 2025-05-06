@@ -1,8 +1,12 @@
 // src/app/projects/[id]/edit/page.tsx
 
-"use client";
-
 import { ProjectFormEditContainer } from "@/components/containers/project/ProjectFormEditContainer";
+
+import { Metadata } from "next";
+export const generateMetadata = (): Metadata => ({
+  title: "Edit Project | IndyFlow",
+  description: "Update project information in IndyFlow.",
+});
 
 /**
  * Page component for editing a project.

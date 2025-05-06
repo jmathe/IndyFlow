@@ -1,10 +1,12 @@
 // src/hooks/useUpdateContact.ts
 
-import { ContactUpdateDTO } from "@/core/domain/contact/types";
+import { ContactDTO, ContactUpdateDTO } from "@/core/domain/contact/types";
 import { updateContactRequest } from "@/infrastructure/services/contact.service";
-import { AppError } from "@/lib/errors/AppError";
 import logger from "@/lib/logger";
-import { notify } from "@/lib/notify";
+import {
+  notifyMutationError,
+  notifyMutationSuccess,
+} from "@/lib/notify/notifyHelpers";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 /**
@@ -22,7 +24,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 export function useUpdateContact() {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<
+    ContactDTO,
+    unknown,
+    { id: string; data: ContactUpdateDTO }
+  >({
     /**
      * Mutation function that sends a PUT request to the API.
      *
@@ -39,7 +45,9 @@ export function useUpdateContact() {
      * @param {ContactDTO} contact - The contact that was updated
      */
     onSuccess: (contact) => {
-      notify.success("Contact successfully updated");
+      notifyMutationSuccess("update", "Contact", {
+        details: { email: contact.email, id: contact.id },
+      });
       queryClient.invalidateQueries({ queryKey: ["contact", contact.id] });
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
       logger.info("useUpdateContact: Contact successfully updated", {
@@ -56,12 +64,7 @@ export function useUpdateContact() {
     onError: (error: unknown) => {
       logger.error("useUpdateContact: Error updating contact", error);
 
-      const message =
-        error instanceof AppError
-          ? error.message
-          : (error as Error).message || "An unknown error occurred";
-
-      notify.error("Update failed", message);
+      notifyMutationError("update", "Contact", error);
     },
   });
 }

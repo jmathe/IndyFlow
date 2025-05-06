@@ -1,4 +1,4 @@
-// src/app/api/projects/[id]/routes.ts
+// src/app/api/contacts/[id]/routes.ts
 
 import { contactFormSchema } from "@/core/domain/contact/validation/contactFormSchema";
 import { DeleteContact } from "@/core/use-cases/contact/deleteContact";
@@ -29,7 +29,7 @@ export async function GET(
   req: NextRequest,
   context: { params: { id: string } }
 ): Promise<NextResponse> {
-  const { id } = context.params;
+  const { id } = await context.params;
   logger.debug("API GET /api/contacts/:id called", { id });
 
   try {
@@ -48,7 +48,7 @@ export async function GET(
 }
 
 /**
- * PUT /api/projects/:id
+ * PUT /api/contacts/:id
  * Updates an existing contact with provided fields.
  *
  * @param {NextRequest} req - Incoming request with JSON body of update fields.
@@ -60,7 +60,7 @@ export async function PUT(
   context: { params: { id: string } }
 ) {
   const { id } = await context.params;
-  logger.debug("API PUT /api/projects/:id called", { id });
+  logger.debug("API PUT /api/contacts/:id called", { id });
 
   try {
     // Validate and sanitize ID
@@ -70,7 +70,7 @@ export async function PUT(
     const body = await req.json();
     const parsed = contactFormSchema.partial().safeParse(body);
     if (!parsed.success) {
-      logger.info("API PUT /api/projects/:id validation failed", {
+      logger.info("API PUT /api/contacts/:id validation failed", {
         id,
         errors: parsed.error.errors,
       });
@@ -83,7 +83,7 @@ export async function PUT(
     const updated = await useCase.execute(id, data);
     const dto = updated.toDTO();
 
-    logger.info("API PUT /api/projects/:id successful", { id });
+    logger.info("API PUT /api/contacts/:id successful", { id });
     return NextResponse.json(dto);
   } catch (error) {
     return handleError(error);
@@ -91,7 +91,7 @@ export async function PUT(
 }
 
 /**
- * DELETE /api/projects/:id
+ * DELETE /api/contacts/:id
  * Deletes an existing contact by its ID.
  *
  * @param {NextRequest} req - Incoming request object.
@@ -103,7 +103,7 @@ export async function DELETE(
   context: { params: { id: string } }
 ) {
   const { id } = await context.params;
-  logger.debug("API DELETE /api/projects/:id called", { id });
+  logger.debug("API DELETE /api/contacts/:id called", { id });
 
   try {
     // Validate and sanitize ID
@@ -113,7 +113,7 @@ export async function DELETE(
     const useCase = new DeleteContact(contactRepo);
     await useCase.execute(id);
 
-    logger.info("API DELETE /api/projects/:id successful", { id });
+    logger.info("API DELETE /api/contacts/:id successful", { id });
     return NextResponse.json({ message: "Contact deleted successfully." });
   } catch (error) {
     return handleError(error);

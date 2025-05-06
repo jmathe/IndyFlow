@@ -1,17 +1,20 @@
-// src/app/api/projects/routes.ts
+// src/app/api/projects/route.ts
 
 import { ProjectDTO } from "@/core/domain/project/types";
 import {
   projectFormSchema,
   ProjectFormValues,
 } from "@/core/domain/project/validation/projectFormSchema";
+import { PromoteContact } from "@/core/use-cases/contact/promoteContact";
 import { CreateProject } from "@/core/use-cases/project/createProject";
 import { ListProjects } from "@/core/use-cases/project/listProjects";
+import { contactRepo } from "@/infrastructure/prisma/contactRepo";
 import { projectRepo } from "@/infrastructure/prisma/projectRepo";
 import { AppError } from "@/lib/errors/AppError";
 import { handleError } from "@/lib/errors/handleError";
 import { parsePaginationParams } from "@/lib/http/parsePaginationParams";
 import logger from "@/lib/logger";
+import { validateId } from "@/lib/validateId";
 import { NextRequest, NextResponse } from "next/server";
 
 /**
@@ -73,10 +76,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   try {
     const body = await req.json();
-    logger.debug("API POST /api/projects payload", body);
+    const { promoteContact, ...projectData } = body;
+    logger.debug("API POST /api/projects received payload", {
+      projectData,
+      promoteContact,
+    });
 
     // Validate request body
-    const parsed = projectFormSchema.safeParse(body);
+    const parsed = projectFormSchema.safeParse(projectData);
     if (!parsed.success) {
       logger.info("API POST /api/projects validation failed", {
         errors: parsed.error.errors,
@@ -84,6 +91,20 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       throw new AppError("Invalid project data", 400);
     }
     const data = parsed.data as ProjectFormValues;
+
+    // If promoteContact is true, promote the associated contact
+    if (promoteContact === true) {
+      // Extract contactId from projectData
+      const contactId: string = data.contactId;
+      validateId(contactId);
+
+      // Execute use-case to promote contact
+      const promoteContactUC = new PromoteContact(contactRepo);
+      await promoteContactUC.execute(data.contactId);
+      logger.info("API POST /api/projects contact promoted", {
+        contactId: data.contactId,
+      });
+    }
 
     // Execute use case to create project
     const createProjectUC = new CreateProject(projectRepo);
@@ -93,7 +114,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     logger.info("API POST /api/projects success", { id: dto.id });
     return NextResponse.json(dto, { status: 201 });
   } catch (error) {
-    logger.error("API POST /api/projects error", error);
     return handleError(error);
   }
 }

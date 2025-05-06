@@ -3,7 +3,7 @@
 import { ProjectRepository } from "@/core/domain/project/ports/projectRepository";
 import type {
   ListProjectsParams,
-  ListProjectsResult,
+  ListProjectsResponse,
 } from "@/core/domain/project/types";
 import { AppError } from "@/lib/errors/AppError";
 import logger from "@/lib/logger";
@@ -13,7 +13,7 @@ import logger from "@/lib/logger";
  * Interacts with the ProjectRepository to fetch data and count.
  *
  * @class ListProjects
- * @implements {UseCase<ListProjectsParams, ListProjectsResult>}
+ * @implements {UseCase<ListProjectsParams, ListProjectsResponse>}
  */
 export class ListProjects {
   /**
@@ -29,14 +29,16 @@ export class ListProjects {
    *
    * @method execute
    * @param {ListProjectsParams} [params] - Pagination options.
-   * @returns {Promise<ListProjectsResult>} Paginated projects and total count.
+   * @returns {Promise<ListProjectsResponse>} Paginated projects and total count.
    * @throws {AppError} If an error occurs while retrieving projects.
    *
    * @example
    * const useCase = new ListProjects(projectRepo);
    * const result = await useCase.execute({ page: 2, limit: 20 });
    */
-  async execute(params: ListProjectsParams = {}): Promise<ListProjectsResult> {
+  async execute(
+    params: ListProjectsParams = {}
+  ): Promise<ListProjectsResponse> {
     logger.debug("ListProjects.execute called with params =", params);
 
     // 1. Validate and normalize pagination parameters

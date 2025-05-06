@@ -55,6 +55,7 @@ export function DatePickerField({
       <Popover>
         <PopoverTrigger asChild>
           <Button
+            id={id}
             variant="outline"
             className={cn(
               "w-full justify-start text-left font-normal",

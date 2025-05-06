@@ -3,7 +3,7 @@
 import { ProjectRepository } from "@/core/domain/project/ports/projectRepository";
 import {
   ListProjectsByContactParams,
-  ListProjectsByContactResult,
+  ListProjectsByContactResponse,
 } from "@/core/domain/project/types";
 import { AppError } from "@/lib/errors/AppError";
 import logger from "@/lib/logger";
@@ -13,7 +13,7 @@ import logger from "@/lib/logger";
  * Interacts with the ProjectRepository to fetch data and count.
  *
  * @class ListProjectsByContact
- * @implements {UseCase<ListProjectsByContactParams, ListProjectsByContactResult>}
+ * @implements {UseCase<ListProjectsByContactParams, ListProjectsByContactResponse>}
  */
 export class ListProjectsByContact {
   /**
@@ -29,7 +29,7 @@ export class ListProjectsByContact {
    *
    * @method execute
    * @param {ListProjectsByContactParams} params - Pagination and contact ID.
-   * @returns {Promise<ListProjectsByContactResult>} Paginated projects and total count.
+   * @returns {Promise<ListProjectsByContactResponse>} Paginated projects and total count.
    * @throws {AppError} If an error occurs while retrieving projects.
    *
    * @example
@@ -38,7 +38,7 @@ export class ListProjectsByContact {
    */
   async execute(
     params: ListProjectsByContactParams
-  ): Promise<ListProjectsByContactResult> {
+  ): Promise<ListProjectsByContactResponse> {
     logger.debug("ListProjectsByContact.execute called with params =", params);
 
     const contactId = params.contactId;

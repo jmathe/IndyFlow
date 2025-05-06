@@ -1,9 +1,11 @@
 // src/hooks/project/useDeleteProject.ts
 
 import { deleteProjectRequest } from "@/infrastructure/services/project.service";
-import { AppError } from "@/lib/errors/AppError";
 import logger from "@/lib/logger";
-import { notify } from "@/lib/notify";
+import {
+  notifyMutationError,
+  notifyMutationSuccess,
+} from "@/lib/notify/notifyHelpers";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 /**
@@ -33,25 +35,21 @@ export function useDeleteProject() {
      */
     onSuccess: (_, id) => {
       logger.info("useDeleteProject: Project deleted", { id });
-      notify.success(
-        "Project deleted",
-        "The project has been successfully removed."
-      );
+      notifyMutationSuccess("delete", "Project", {
+        details: { id },
+      });
       queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
 
     /**
      * Handle error: log and notify
      */
-    onError: (error) => {
+    onError: (error, id) => {
       logger.error("useDeleteProject: Failed to delete project", error);
 
-      const message =
-        error instanceof AppError
-          ? error.message
-          : (error as Error).message || "An unexpected error occurred";
-
-      notify.error("Failed to delete project", message);
+      notifyMutationError("delete", "Project", error, {
+        details: { id },
+      });
     },
   });
 }

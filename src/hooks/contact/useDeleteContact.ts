@@ -2,7 +2,10 @@
 
 import { deleteContactRequest } from "@/infrastructure/services/contact.service";
 import logger from "@/lib/logger";
-import { notify } from "@/lib/notify";
+import {
+  notifyMutationError,
+  notifyMutationSuccess,
+} from "@/lib/notify/notifyHelpers";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 /**
@@ -20,7 +23,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 export function useDeleteContact() {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<void, unknown, string>({
     /**
      * Mutation function that sends a DELETE request to the API.
      *
@@ -32,9 +35,14 @@ export function useDeleteContact() {
     /**
      * Callback executed on successful mutation.
      * Invalidates the 'contacts' query and shows a success toast.
+     *
+     * @param {void} _ - The response from the server
+     * @param {string} id - The ID of the contact to delete
      */
     onSuccess: (_, id) => {
-      notify.contactDeleted();
+      notifyMutationSuccess("delete", "Contact", {
+        details: { id },
+      });
       // refresh the contact list
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
       logger.info("useDeleteContact: Contact successfully deleted ", {
@@ -45,13 +53,16 @@ export function useDeleteContact() {
     /**
      * Callback executed on mutation error.
      * Displays an error toast and logs the error.
+     *
+     * @param {unknown} error - The error thrown during deletion
+     * @param {string} id - The ID of the contact to delete
      */
-    onError: (error) => {
+    onError: (error, id) => {
       logger.error("useDeleteContact: Error deleting contact", error);
 
-      const message =
-        error instanceof Error ? error.message : "An unknown error occurred";
-      notify.error("Deletion failed", message);
+      notifyMutationError("delete", "Contact", error, {
+        details: { id },
+      });
     },
   });
 }

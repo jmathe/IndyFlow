@@ -40,10 +40,12 @@ model Contact {
 // 🔁 Enum : Statut d’un projet
 // ------------------------------
 enum ProjectStatus {
-  PENDING
-  IN_PROGRESS
-  COMPLETED
-  CANCELED
+  PENDING // Projet en réflexion ou en attente d'action
+  QUOTE_SENT // Devis envoyé, attente de réponse
+  ACCEPTED // Devis accepté, prêt à être démarré
+  IN_PROGRESS // Projet en cours
+  COMPLETED // Projet terminé
+  CANCELLED // Projet annulé
 }
 
 // ---------------------------

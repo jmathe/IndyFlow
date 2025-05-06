@@ -1,4 +1,4 @@
-// src/app/api/projects/contact/[contactId]/routes.ts
+// src/app/api/projects/contact/[contactId]/route.ts
 
 import { ProjectDTO } from "@/core/domain/project/types";
 import { ListProjectsByContact } from "@/core/use-cases/project/listProjectsByContact";
@@ -57,8 +57,6 @@ export async function GET(
       { status: 200 }
     );
   } catch (error) {
-    // Log and handle errors consistently
-    logger.error("API GET /api/projects/contact/[contactId] error", error);
     return handleError(error);
   }
 }

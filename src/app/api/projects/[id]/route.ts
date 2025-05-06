@@ -1,11 +1,12 @@
+// src/app/api/projects/[id]/route.ts
+
 import { ProjectDTO } from "@/core/domain/project/types";
-import {
-  projectFormSchema,
-  ProjectFormValues,
-} from "@/core/domain/project/validation/projectFormSchema";
+import { projectUpdateSchema } from "@/core/domain/project/validation/projectFormSchema";
+import { PromoteContact } from "@/core/use-cases/contact/promoteContact";
 import { DeleteProject } from "@/core/use-cases/project/deleteProject";
 import { GetProject } from "@/core/use-cases/project/getProject";
 import { UpdateProject } from "@/core/use-cases/project/updateProject";
+import { contactRepo } from "@/infrastructure/prisma/contactRepo";
 import { projectRepo } from "@/infrastructure/prisma/projectRepo";
 import { AppError } from "@/lib/errors/AppError";
 import { handleError } from "@/lib/errors/handleError";
@@ -72,9 +73,11 @@ export async function PUT(
     // Validate project ID
     validateId(id);
 
-    // Parse and validate request body
+    // Parse body
     const body = await req.json();
-    const parsed = projectFormSchema.partial().safeParse(body);
+
+    // Validate project fields
+    const parsed = projectUpdateSchema.safeParse(body);
     if (!parsed.success) {
       logger.info("API PUT /api/projects/:id validation failed", {
         id,
@@ -82,7 +85,24 @@ export async function PUT(
       });
       throw new AppError("Invalid project update data", 400);
     }
-    const data: Partial<ProjectFormValues> = parsed.data;
+    const { promoteContact, ...data } = parsed.data;
+    logger.debug("PUT : promoteContact", promoteContact);
+    //const data: Partial<ProjectFormValues> = parsed.data;
+
+    // If promoteContact is true, execute the use-case
+    if (promoteContact === true) {
+      logger.debug("PUT : promoteContact is true");
+      // Extract contactId from projectData
+      const contactId: string = data.contactId ?? "";
+      validateId(contactId);
+
+      // Execute use-case to promote contact
+      const promoteContactUC = new PromoteContact(contactRepo);
+      await promoteContactUC.execute(contactId);
+      logger.info("API PUT /api/projects/:id contact promoted", {
+        contactId: data.contactId,
+      });
+    }
 
     // Execute use case to update project
     const updateProjectUC = new UpdateProject(projectRepo);
@@ -113,7 +133,7 @@ export async function DELETE(
   req: NextRequest,
   context: { params: { id: string } }
 ): Promise<NextResponse> {
-  const { id } = context.params;
+  const { id } = await context.params;
   logger.debug("API DELETE /api/projects/:id start", { id });
 
   try {
@@ -130,7 +150,6 @@ export async function DELETE(
       { status: 200 }
     );
   } catch (error) {
-    logger.error("API DELETE /api/projects/:id error", error);
     return handleError(error);
   }
 }

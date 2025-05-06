@@ -79,6 +79,7 @@ export function SelectField({
       <Select.Root value={value} onValueChange={onChange}>
         <Select.Trigger
           id={id}
+          name={id}
           aria-invalid={!!error}
           aria-describedby={error ? `${id}-error` : undefined}
         >

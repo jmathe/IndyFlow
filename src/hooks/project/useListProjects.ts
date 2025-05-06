@@ -2,12 +2,14 @@
 
 import {
   ListProjectsParams,
-  ListProjectsResult,
+  ListProjectsResponse,
 } from "@/core/domain/project/types";
 import { listProjectsRequest } from "@/infrastructure/services/project.service";
-import { AppError } from "@/lib/errors/AppError";
 import logger from "@/lib/logger";
-import { notify } from "@/lib/notify";
+import {
+  notifyMutationError,
+  notifyMutationSuccess,
+} from "@/lib/notify/notifyHelpers";
 import { useQuery } from "@tanstack/react-query";
 
 /**
@@ -19,7 +21,7 @@ import { useQuery } from "@tanstack/react-query";
  *
  * @function useListProjects
  * @param {ListProjectsParams} params - The pagination parameters
- * @returns {UseQueryResult<ListProjectsResult>} Query result object
+ * @returns {UseQueryResult<ListProjectsResponse>} Query result object
  */
 export function useListProjects({ page, limit }: ListProjectsParams) {
   const options = {
@@ -30,6 +32,8 @@ export function useListProjects({ page, limit }: ListProjectsParams) {
 
     /**
      * Function calling the service to fetch paginated projects
+     *
+     * @returns {Promise<ListProjectsResponse>} The paginated projects
      */
     queryFn: () => listProjectsRequest({ page, limit }),
 
@@ -43,11 +47,14 @@ export function useListProjects({ page, limit }: ListProjectsParams) {
      *
      * @param {ListProjectsResponse} result - The paginated response
      */
-    onSuccess: (result: ListProjectsResult) => {
+    onSuccess: (result: ListProjectsResponse) => {
       logger.info("useListProjects: Projects fetched successfully", {
         page,
         count: result.data.length,
         total: result.totalCount,
+      });
+      notifyMutationSuccess("list", "Project", {
+        details: { count: result.data.length },
       });
     },
 
@@ -59,12 +66,7 @@ export function useListProjects({ page, limit }: ListProjectsParams) {
     onError: (error: unknown) => {
       logger.error("useListProjects: Failed to fetch projects", error);
 
-      const message =
-        error instanceof AppError
-          ? error.message
-          : (error as Error).message || "An unexpected error occurred";
-
-      notify.error("Failed to load projects", message);
+      notifyMutationError("list", "Project", error);
     },
   } as const;
 

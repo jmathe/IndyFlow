@@ -1,8 +1,12 @@
 // src/app/contacts/[id]/edit/page.tsx
 
-"use client";
-
 import { ContactFormEditContainer } from "@/components/containers/contact/ContactFormEditContainer";
+import { Metadata } from "next";
+
+export const generateMetadata = (): Metadata => ({
+  title: "Edit Contact | IndyFlow",
+  description: "Update contact information in IndyFlow.",
+});
 
 /**
  * Page component for editing a contact.

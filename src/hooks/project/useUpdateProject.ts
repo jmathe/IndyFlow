@@ -1,10 +1,12 @@
 // src/hooks/project/useUpdateProject.ts
 
-import { ProjectUpdateDTO } from "@/core/domain/project/types";
+import { UpdateProjectPayload } from "@/core/domain/project/types";
 import { updateProjectRequest } from "@/infrastructure/services/project.service";
-import { AppError } from "@/lib/errors/AppError";
 import logger from "@/lib/logger";
-import { notify } from "@/lib/notify";
+import {
+  notifyMutationError,
+  notifyMutationSuccess,
+} from "@/lib/notify/notifyHelpers";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 /**
@@ -17,7 +19,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
  * - Logs the mutation lifecycle
  *
  * @function useUpdateProject
- * @returns {UseMutationResult<ProjectDTO, unknown, { id: string; data: ProjectUpdateDTO }>} The mutation object for updating projects
+ * @returns {UseMutationResult<ProjectDTO, unknown, { id: string; data: UpdateProjectPayload }>} The mutation object for updating projects
  */
 export function useUpdateProject() {
   const queryClient = useQueryClient();
@@ -26,10 +28,10 @@ export function useUpdateProject() {
     /**
      * Mutation function that sends a PUT request to the API.
      *
-     * @param {{ id: string; data: ProjectUpdateDTO }} input - Project ID and update payload
+     * @param {{ id: string; data: UpdateProjectPayload }} input - Project ID and update payload
      * @returns {Promise<ProjectDTO>} The updated project returned by the server
      */
-    mutationFn: ({ id, data }: { id: string; data: ProjectUpdateDTO }) =>
+    mutationFn: ({ id, data }: { id: string; data: UpdateProjectPayload }) =>
       updateProjectRequest(id, data),
 
     /**
@@ -38,8 +40,21 @@ export function useUpdateProject() {
      *
      * @param {ProjectDTO} project - The project that was updated
      */
-    onSuccess: (project) => {
-      notify.success("Project successfully updated");
+    onSuccess: (project, variables) => {
+      const { promoteContact } = variables.data;
+      // If promoteContact is true, notify the user and log the event
+      if (promoteContact) {
+        notifyMutationSuccess("promote", "Contact", {
+          details: { contactId: project.contactId },
+        });
+        logger.info("useUpdateProject: Contact promoted", {
+          contactId: project.contactId,
+        });
+      }
+
+      notifyMutationSuccess("update", "Project", {
+        details: { id: project.id },
+      });
       queryClient.invalidateQueries({ queryKey: ["project", project.id] });
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       logger.info("useUpdateProject: Project successfully updated", {
@@ -56,12 +71,7 @@ export function useUpdateProject() {
     onError: (error: unknown) => {
       logger.error("useUpdateProject: Error updating project", error);
 
-      const message =
-        error instanceof AppError
-          ? error.message
-          : (error as Error).message || "An unknown error occurred";
-
-      notify.error("Project update failed", message);
+      notifyMutationError("update", "Project", error);
     },
   });
 }

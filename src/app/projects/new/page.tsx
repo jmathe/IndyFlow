@@ -1,8 +1,12 @@
 // src/app/projects/new/page.tsx
 
-"use client";
-
 import { ProjectFormCreateContainer } from "@/components/containers/project/ProjectFormCreateContainer";
+
+import { Metadata } from "next";
+export const generateMetadata = (): Metadata => ({
+  title: "Create Project | IndyFlow",
+  description: "Create project in IndyFlow.",
+});
 
 /**
  * Page for creating a new project.

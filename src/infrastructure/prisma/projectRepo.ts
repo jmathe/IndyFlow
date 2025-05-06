@@ -36,6 +36,13 @@ export const projectRepo: ProjectRepository = {
           status: data.status,
           contact: { connect: { id: data.contactId } },
         },
+        include: {
+          contact: {
+            select: {
+              name: true,
+            },
+          },
+        },
       });
       logger.info("projectRepo.create: project created, id =", result.id);
       return Project.fromDB(result);
@@ -59,6 +66,13 @@ export const projectRepo: ProjectRepository = {
     try {
       const result: ProjectDB | null = await prisma.project.findUnique({
         where: { id },
+        include: {
+          contact: {
+            select: {
+              name: true,
+            },
+          },
+        },
       });
       if (!result) {
         logger.info("projectRepo.findById: no project found for id =", id);
@@ -88,6 +102,13 @@ export const projectRepo: ProjectRepository = {
         orderBy: { createdAt: "desc" },
         skip,
         take,
+        include: {
+          contact: {
+            select: {
+              name: true,
+            },
+          },
+        },
       });
       logger.info(
         "projectRepo.findMany: projects retrieved, count =",
@@ -122,6 +143,13 @@ export const projectRepo: ProjectRepository = {
         orderBy: { createdAt: "desc" },
         skip,
         take,
+        include: {
+          contact: {
+            select: {
+              name: true,
+            },
+          },
+        },
       });
       logger.info(
         `projectRepo.findByContactId: projects retrieved for contactId = ${contactId}, count = ${results.length}`
@@ -153,6 +181,13 @@ export const projectRepo: ProjectRepository = {
       const result: ProjectDB = await prisma.project.update({
         where: { id },
         data: updateData,
+        include: {
+          contact: {
+            select: {
+              name: true,
+            },
+          },
+        },
       });
       logger.info("projectRepo.update: project updated, id =", result.id);
       return Project.fromDB(result);

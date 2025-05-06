@@ -2,9 +2,10 @@
 
 import {
   ListProjectsParams,
-  ListProjectsResult,
+  ListProjectsResponse,
   ProjectCreateDTO,
   ProjectDTO,
+  ProjectUpdateDTO,
 } from "@/core/domain/project/types";
 import { AppError } from "@/lib/errors/AppError";
 import logger from "@/lib/logger";
@@ -14,7 +15,7 @@ import logger from "@/lib/logger";
  *
  * @function listProjectsRequest
  * @param {ListProjectsParams} params - Pagination parameters.
- * @returns {Promise<ListProjectsResult>} A promise resolving to paginated project data.
+ * @returns {Promise<ListProjectsResponse>} A promise resolving to paginated project data.
  * @throws {AppError} If the server returns a non-2xx response.
  *
  * @example
@@ -22,7 +23,7 @@ import logger from "@/lib/logger";
  */
 export async function listProjectsRequest(
   params: ListProjectsParams = {}
-): Promise<ListProjectsResult> {
+): Promise<ListProjectsResponse> {
   const page = params.page ?? 1;
   const limit = params.limit ?? 10;
 
@@ -125,13 +126,13 @@ export async function getProjectRequest(id: string): Promise<ProjectDTO> {
  *
  * @function updateProjectRequest
  * @param {string} id - ID of the project to update.
- * @param {Partial<ProjectCreateDTO>} data - Partial project update payload.
+ * @param {Partial<ProjectUpdateDTO> & { promoteContact?: boolean }} data - Partial project update payload.
  * @returns {Promise<ProjectDTO>} A promise resolving to the updated project DTO.
  * @throws {AppError} If the update fails.
  */
 export async function updateProjectRequest(
   id: string,
-  data: Partial<ProjectCreateDTO>
+  data: Partial<ProjectUpdateDTO> & { promoteContact?: boolean }
 ): Promise<ProjectDTO> {
   logger.debug("project.service: Updating project", { id, data });
 
@@ -198,12 +199,12 @@ export async function deleteProjectRequest(id: string): Promise<void> {
  *
  * @function listProjectsByContact
  * @param {string} contactId - The unique identifier of the contact.
- * @returns {Promise<ListProjectsResult>} A promise resolving to the list of projects.
+ * @returns {Promise<ListProjectsResponse>} A promise resolving to the list of projects.
  * @throws {AppError} If the server response is not successful.
  */
 export async function listProjectsByContact(
   contactId: string
-): Promise<ListProjectsResult> {
+): Promise<ListProjectsResponse> {
   logger.debug("project.service: Fetching projects for contact", { contactId });
 
   const url = `/api/projects/contact/${contactId}`;

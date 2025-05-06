@@ -3,7 +3,10 @@
 import { ContactCreateDTO, ContactDTO } from "@/core/domain/contact/types";
 import { createContactRequest } from "@/infrastructure/services/contact.service";
 import logger from "@/lib/logger";
-import { notify } from "@/lib/notify";
+import {
+  notifyMutationError,
+  notifyMutationSuccess,
+} from "@/lib/notify/notifyHelpers";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 /**
@@ -31,9 +34,13 @@ export function useCreateContact() {
     /**
      * Called when the contact is successfully created.
      * Shows a success toast and invalidates the contact list cache.
+     *
+     * @param {ContactDTO} newContact - The created contact
      */
     onSuccess: (newContact) => {
-      notify.success("Contact successfully created");
+      notifyMutationSuccess("create", "Contact", {
+        details: { name: newContact.name, email: newContact.email },
+      });
       logger.info("useCreateContact: Contact created", {
         id: newContact.id,
         email: newContact.email,
@@ -46,13 +53,12 @@ export function useCreateContact() {
     /**
      * Called when an error occurs during contact creation.
      * Shows an error toast and logs the error.
+     *
+     * @param {unknown} error - The error thrown during creation
      */
     onError: (error) => {
       logger.error("useCreateContact: Error creating contact", error);
-
-      const message =
-        error instanceof Error ? error.message : "An unexpected error occurred";
-      notify.error("Creation failed", message);
+      notifyMutationError("create", "Contact", error);
     },
   });
 }

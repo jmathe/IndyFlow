@@ -51,6 +51,8 @@ export interface ProjectUpdateDTO extends Partial<ProjectCreateDTO> {}
 export interface ProjectDTO extends ProjectBase, ProjectCreateDTO {
   /** ISO-formatted creation date of the project */
   createdAt: string;
+  /** Contact name */
+  contactName: string;
 }
 
 /**
@@ -68,6 +70,10 @@ export interface ProjectDB extends ProjectBase {
   amount: number | null;
   /** Due date may be null in the database */
   dueDate: Date | null;
+  /** contact associated with the project */
+  contact: {
+    name: string;
+  } | null;
 }
 
 /**
@@ -85,11 +91,11 @@ export interface ListProjectsParams {
 /**
  * Structure of paginated project results.
  *
- * @interface ListProjectsResult
+ * @interface ListProjectsResponse
  * @property {Project[]} data - Array of projects for the requested page.
  * @property {number} totalCount - Total number of projects available.
  */
-export interface ListProjectsResult {
+export interface ListProjectsResponse {
   data: Project[];
   totalCount: number;
 }
@@ -111,11 +117,33 @@ export interface ListProjectsByContactParams {
 /**
  * Structure of paginated project results for a contact.
  *
- * @interface ListProjectsByContactResult
+ * @interface ListProjectsByContactResponse
  * @property {Project[]} data - Array of projects for the requested page.
  * @property {number} totalCount - Total number of projects for the contact.
  */
-export interface ListProjectsByContactResult {
+export interface ListProjectsByContactResponse {
   data: Project[];
   totalCount: number;
 }
+
+/**
+ * Type for the payload of the updateProjectRequest mutation.
+ * Includes optional promoteContact flag.
+ * @typedef {Object} UpdateProjectPayload
+ * @property {ProjectUpdateDTO} data - Project update payload.
+ * @property {boolean} [promoteContact] - Optional flag to promote the contact to client.
+ */
+export type UpdateProjectPayload = ProjectUpdateDTO & {
+  promoteContact?: boolean;
+};
+
+/**
+ * Type for the payload of the createProjectRequest mutation.
+ * Includes optional promoteContact flag.
+ * @typedef {Object} CreateProjectPayload
+ * @property {ProjectCreateDTO} data - Project creation payload.
+ * @property {boolean} [promoteContact] - Optional flag to promote the contact to client.
+ */
+export type CreateProjectPayload = ProjectCreateDTO & {
+  promoteContact?: boolean;
+};

@@ -2,9 +2,8 @@
 
 import { ProjectDTO } from "@/core/domain/project/types";
 import { getProjectRequest } from "@/infrastructure/services/project.service";
-import { AppError } from "@/lib/errors/AppError";
 import logger from "@/lib/logger";
-import { notify } from "@/lib/notify";
+import { notifyMutationError } from "@/lib/notify/notifyHelpers";
 import { useQuery } from "@tanstack/react-query";
 
 /**
@@ -23,6 +22,8 @@ export function useProject(id: string) {
 
     /**
      * Query function calling the service to retrieve the project
+     *
+     * @returns {Promise<ProjectDTO>} The project
      */
     queryFn: () => getProjectRequest(id),
 
@@ -50,12 +51,9 @@ export function useProject(id: string) {
     onError: (error: unknown) => {
       logger.error("useProject: Failed to fetch project", error);
 
-      const message =
-        error instanceof AppError
-          ? error.message
-          : (error as Error).message || "An unknown error occurred";
-
-      notify.error("Failed to load project", message);
+      notifyMutationError("get", "Project", error, {
+        details: { id },
+      });
     },
   } as const;
 

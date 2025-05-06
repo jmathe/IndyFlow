@@ -22,6 +22,7 @@ export class Project {
   status: ProjectStatus;
   readonly contactId: string;
   readonly createdAt: string;
+  readonly contactName: string;
 
   /**
    * Initializes a Project entity from a DTO.
@@ -37,6 +38,7 @@ export class Project {
     this.status = params.status;
     this.contactId = params.contactId;
     this.createdAt = params.createdAt;
+    this.contactName = params.contactName;
   }
 
   /**
@@ -55,6 +57,7 @@ export class Project {
       status: params.status,
       contactId: params.contactId,
       createdAt: params.createdAt.toISOString(),
+      contactName: params.contact?.name ?? "Unknown Contact",
     };
     return new Project(dto);
   }
@@ -74,6 +77,7 @@ export class Project {
       status: this.status,
       contactId: this.contactId,
       createdAt: this.createdAt,
+      contactName: this.contactName,
     };
   }
 
@@ -116,7 +120,7 @@ export class Project {
       this.status === ProjectStatus.PENDING ||
       this.status === ProjectStatus.IN_PROGRESS
     ) {
-      this.status = ProjectStatus.CANCELED;
+      this.status = ProjectStatus.CANCELLED;
     }
   }
 }

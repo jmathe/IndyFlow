@@ -30,20 +30,4 @@ export const notify = {
    * @param {string} [description] - Optional additional description.
    */
   info: (title: string, description?: string) => toast(title, { description }),
-
-  /**
-   * Shortcut for notifying that a contact was successfully created.
-   */
-  contactCreated: () =>
-    toast.success("Contact successfully added", {
-      description: "The contact has been saved successfully.",
-    }),
-
-  /**
-   * Shortcut for notifying that a contact was permanently deleted.
-   */
-  contactDeleted: () =>
-    toast("Contact successfully deleted", {
-      description: "This contact has been permanently removed.",
-    }),
 };
